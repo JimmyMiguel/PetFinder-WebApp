@@ -58,7 +58,12 @@ Pet.init(
       allowNull: false,
       // Ej: "Parque Central, Pasaje, El Oro"
     },
-    location_geo: {
+    latitud_geo: {
+      type: DataTypes.GEOMETRY('POINT', 4326),
+      allowNull: false,
+      // Almacena la latitud y longitud para renderizar los pines en el mapa
+    },
+    longitud_geo: {
       type: DataTypes.GEOMETRY('POINT', 4326),
       allowNull: false,
       // Almacena la latitud y longitud para renderizar los pines en el mapa
@@ -77,8 +82,7 @@ Pet.init(
   }
 );
 
-// --- Definición de Relaciones ---
-// Un usuario puede tener muchas mascotas (reportadas o en adopción)
+
 User.hasMany(Pet, {
   sourceKey: 'id',
   foreignKey: 'userId',
