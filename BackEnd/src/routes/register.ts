@@ -7,7 +7,7 @@ import jwt, { JwtPayload } from "jsonwebtoken"
 
 const register = Router();
 
-register.post('/api/auth/register', async (req: Request, res: Response) => {
+register.post('/auth/register', async (req: Request, res: Response) => {
     try {
 
         //traemos de la peticion del body

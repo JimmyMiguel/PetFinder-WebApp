@@ -4,7 +4,7 @@ import jwt, {JwtPayload} from 'jsonwebtoken'
 
 
   //creamos la funcion y el nextFuncion para ejecutar lo siguiente despuesde de este funcion
-export const requireAuth =  async (req:Request,res:Response,next:NextFunction)=>{
+export const requireAuth =   (req:Request,res:Response,next:NextFunction)=>{
     //traemos el encabezado de la peticion http 
     //que se llama autorizacion 
   const authHeader = req.get("Authorization")
@@ -17,11 +17,11 @@ export const requireAuth =  async (req:Request,res:Response,next:NextFunction)=>
 
   // Por estándar, el token viene como "Bearer <el_token_largo>".
   // Con split(" ") divides esa frase en un arreglo ["Bearer", "<el_token_largo>"] y tomas la posición [1]
-  const decodedToken = authHeader.split(" ")[1]
+  const token = authHeader.split(" ")[1]
 
   try {
     //verificamos el token parseado con el token que nosotros creamos 
-    const check = jwt.verify(decodedToken, process.env.JWT_TOKEN!) as JwtPayload
+    const check = jwt.verify(token, process.env.JWT_TOKEN!) as JwtPayload
 
 // Si se verificó bien, guardas el contenido del token (usualmente el ID del usuario) en 'res.locals'
     // res.locals es un espacio seguro en Express para pasar datos entre middlewares y controladores

@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 
 const login = Router();
 
-login.post("/api/auth/login", async (req: Request, res: Response) => {
+login.post("/auth/login", async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 

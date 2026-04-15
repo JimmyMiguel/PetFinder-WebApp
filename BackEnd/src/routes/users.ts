@@ -1,10 +1,37 @@
-import { Router,Request,Response } from "express";
-const users = Router()
+import { Router, Request, Response } from "express";
+import { requireAuth } from "@/middleware/midToken";
+import User from "@/models/users";
+import Pet from "@/models/pets";
+import { deflate } from "node:zlib";
+ 
+
+const profile = Router()
+
+profile.get("/api/users/profile", requireAuth, async (req, res) => {
+
+    try {
+        //traido el id del middlewere
+        const userId = res.locals.jwtPayload.id;
+        //busco el usuario
+        const user = await User.findByPk(userId, {
+            attributes: { exclude: ['password'] }//no traemos el password
+        })
+        //traigo a las mascotas del usuario
+        const userPets = await Pet.findAll({
+                where:
+                    { userId: userId }
+            })
 
 
-users.get("api/users/profile", (req,res)=>{
-    //Para obtener los datos del usuario logueado, incluyendo el conteo de "Mascotas reportadas" y "Mascotas adoptadas".
+        return res.status(200).json({
+            user, userPets
+        })
 
-    
+    } catch (error) {
+
+        return res.status(500).json({ message: "Error interno del servidor" });
+    }
 
 })
+
+export default profile

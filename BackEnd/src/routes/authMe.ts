@@ -7,7 +7,7 @@ import User from '@/models/users';
 const authRouter = Router()
 
 
-authRouter.get("/api/auth/me", requireAuth, async (req:Request,res:Response)=>{
+authRouter.get("/auth/me", requireAuth, async (req:Request,res:Response)=>{
     //tremos el usuario de el middlewere
     const {user} = res.locals.JwtPayload
     //comprobamos si esta correcto 
@@ -35,3 +35,4 @@ try {
 
 
 })
+export default authRouter
