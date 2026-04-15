@@ -7,7 +7,7 @@ import { deflate } from "node:zlib";
 
 const profile = Router()
 
-profile.get("/api/users/profile", requireAuth, async (req, res) => {
+profile.get("users/profile", requireAuth, async (req, res) => {
 
     try {
         //traido el id del middlewere
