@@ -7,11 +7,10 @@
       "esModuleInterop": true,
       "allowSyntheticDefaultImports": true,
       "strict": true,
-      "baseUrl": ".", 
-      "paths": {
-        "@/*": ["src/*"],
-        "@models/*": ["src/models/*"],
-        "@controllers/*": ["src/controllers/*"]}
+       "paths": {
+        "@/*": ["./src/*"],
+        "@models/*": ["./src/models/*"],
+        "@controllers/*": ["./src/controllers/*"]}
     },
     "include": ["src/**/*"],
     "exclude": ["node_modules", "**/*.spec.ts"]
