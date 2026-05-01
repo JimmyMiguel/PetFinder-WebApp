@@ -1,5 +1,5 @@
 import { Model, DataTypes } from 'sequelize';
-import {sequelize} from '../config/index';
+import { sequelize } from '../config/index';
 import User from './users';
 
 class Pet extends Model {
@@ -11,7 +11,8 @@ class Pet extends Model {
   public description!: string;
   public event_date!: Date;
   public location_text!: string;
-  public location_geo!: any; // Sequelize tipa GEOMETRY como any por defecto
+  // ✅ CORRECCIÓN 1: Se mantiene location_geo en la clase para manejar el objeto Point
+  public location_geo!: any; 
   public photos!: string[];
 
   public readonly createdAt!: Date;
@@ -29,7 +30,7 @@ Pet.init(
       type: DataTypes.UUID,
       allowNull: false,
       references: {
-        model: 'users',
+        model: 'users',  
         key: 'id',
       },
     },
@@ -39,7 +40,7 @@ Pet.init(
     },
     name: {
       type: DataTypes.STRING,
-      allowNull: true, // Opcional si es una mascota encontrada en la calle
+      allowNull: true,  
     },
     animal_type: {
       type: DataTypes.STRING,
@@ -50,29 +51,22 @@ Pet.init(
       allowNull: false,
     },
     event_date: {
-      type: DataTypes.DATEONLY,
+      type: DataTypes.DATEONLY,  
       allowNull: false,
     },
     location_text: {
       type: DataTypes.STRING,
       allowNull: false,
-      // Ej: "Parque Central, Pasaje, El Oro"
     },
-    latitud_geo: {
+ 
+    location_geo: {
       type: DataTypes.GEOMETRY('POINT', 4326),
       allowNull: false,
-      // Almacena la latitud y longitud para renderizar los pines en el mapa
-    },
-    longitud_geo: {
-      type: DataTypes.GEOMETRY('POINT', 4326),
-      allowNull: false,
-      // Almacena la latitud y longitud para renderizar los pines en el mapa
-    },
+     },
     photos: {
       type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: false,
       defaultValue: [],
-      // Arreglo de URLs de Firebase Storage
     },
   },
   {
@@ -82,14 +76,12 @@ Pet.init(
   }
 );
 
-
 User.hasMany(Pet, {
   sourceKey: 'id',
   foreignKey: 'userId',
   as: 'pets',
 });
 
-// Una mascota pertenece a un usuario específico
 Pet.belongsTo(User, {
   foreignKey: 'userId',
   as: 'owner',

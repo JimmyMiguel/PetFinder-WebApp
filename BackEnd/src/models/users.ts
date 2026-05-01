@@ -1,11 +1,12 @@
-import { Model, DataTypes, Sequelize } from 'sequelize';
-import {sequelize} from '../config/index'; 
+import { Model, DataTypes } from 'sequelize';
+import { sequelize } from '../config/index'; 
 
 class User extends Model {
   public id!: string;
   public name!: string;
   public email!: string;
   public password!: string;
+   public phone?: string | null; 
   public profile_picture?: string | null;
 
   // Timestamps
@@ -36,11 +37,14 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
+     phone: {
+      type: DataTypes.STRING,
+      allowNull: true, // Permite que los usuarios se registren sin dar el teléfono inicialmente
+    },
     profile_picture: {
       type: DataTypes.STRING,
       allowNull: true,
-      // Aquí guardarás la URL de Firebase Storage
-    },
+     },
   },
   {
     sequelize,
