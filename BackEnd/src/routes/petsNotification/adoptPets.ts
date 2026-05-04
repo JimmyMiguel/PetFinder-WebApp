@@ -2,131 +2,84 @@ import { Router, Request, Response } from "express";
 import { requireAuth } from "@/middleware/midToken";
 import Pet from "@/models/pets";
 import User from "@/models/users";
-import { Resend } from "resend"; // ✅ Importamos Resend
+import { Resend } from "resend"; 
 
-const petRoutes = Router();
-
-// Inicializamos el cliente usando la llave de tu archivo .env
-// Asegúrate de agregar RESEND_API_KEY a tus variables de entorno
+const adoptPets = Router();
 const resend = new Resend(process.env.RESEND_API_KEY as string);
 
-// Endpoint: POST /api/pets/:id/claim
-petRoutes.post(
-  "/pets/:id/claim",
-  requireAuth,
-  async (req: Request, res: Response): Promise<void> => {
+// CORRECCIÓN: Endpoint cambiado a /pets/:id/adopt
+adoptPets.post("/pets/:id/adopt", requireAuth, async (req: Request, res: Response): Promise<void> => {
     try {
       const petId = req.params.id as string;
 
-      // 1. Obtener el ID del "Dueño" (quien hace clic en el botón)
-      const { userId: claimerId } = res.locals.JwtPayload;
+      // CORRECCIÓN JWT: Extraemos 'id' y lo renombramos a 'adopterId'
+      const { id: adopterId } = res.locals.JwtPayload;
 
-      // 2. Buscar la mascota y los datos del "Rescatista"
       const pet = await Pet.findByPk(petId, {
-        include: [
-          {
-            model: User,
-            as: "owner",
-            attributes: ["id", "name", "email"],
-          },
-        ],
+        include: [{ model: User, as: "owner", attributes: ["id", "name", "email"] }],
       });
 
       if (!pet) {
-        res
-          .status(404)
-          .json({ error: "La publicación de esta mascota no existe." });
+        res.status(404).json({ error: "La publicación de esta mascota no existe." });
         return;
       }
 
-      // 3. Validaciones de Negocio
-      if (pet.status !== "ENCONTRADA") {
-        res
-          .status(400)
-          .json({
-            error:
-              "Solo puedes reclamar mascotas que estén reportadas como encontradas.",
-          });
+      // CORRECCIÓN LÓGICA: Validar que esté en adopción
+      if (pet.status !== "EN_ADOPCION") {
+        res.status(400).json({ error: "Esta mascota no está disponible para adopción." });
         return;
       }
 
-      if (pet.userId === claimerId) {
-        res
-          .status(400)
-          .json({
-            error: "No puedes reclamar una mascota que tú mismo publicaste.",
-          });
+      if (pet.userId === adopterId) {
+        res.status(400).json({ error: "No puedes adoptar una mascota que tú mismo publicaste." });
         return;
       }
 
-      // 4. Buscar los datos de contacto del "Dueño"
-      const claimer = await User.findByPk(claimerId, {
-        attributes: ["name", "email", "phone"],
-      });
+      const adopter = await User.findByPk(adopterId, { attributes: ["name", "email", "phone"] });
 
-      if (!claimer) {
-        res
-          .status(404)
-          .json({ error: "No se pudieron obtener tus datos de usuario." });
+      if (!adopter) {
+        res.status(404).json({ error: "No se pudieron obtener tus datos de usuario." });
         return;
       }
 
-      const finderData = (pet as any).owner;
+      const ownerData = (pet as any).owner;
 
-      // 5. Enviar el correo usando Resend
-      const { data, error } = await resend.emails.send({
-        // ⚠️ IMPORTANTE: Mientras pruebas, Resend te da este dominio por defecto.
-        // Solo puedes enviar correos a la dirección de email con la que creaste tu cuenta en Resend.
-        // Cuando agregues tu dominio propio, cambias esto a: "Petfinder <hola@tudominio.com>"
+      // CORRECCIÓN TEXTO CORREO: Adaptado para adopciones
+      const { error } = await resend.emails.send({
         from: "Petfinder <onboarding@resend.dev>",
-        to: finderData.email,
-        subject: `¡Alguien busca al ${pet.animal_type} que encontraste! 🐾`,
+        to: ownerData.email,
+        subject: `¡Alguien quiere adoptar a ${pet.animal_type}! ❤️🐾`,
         html: `
         <div style="font-family: sans-serif; color: #333;">
-          <h2>Hola, ${finderData.name} 👋</h2>
-          <p>¡Excelentes noticias! El usuario <strong>${claimer.name}</strong> ha visto tu publicación y cree que el ${pet.animal_type} que encontraste en <em>${pet.location_text}</em> es su mascota.</p>
+          <h2>Hola, ${ownerData.name} 👋</h2>
+          <p>¡Qué emoción! El usuario <strong>${adopter.name}</strong> está interesado en darle un hogar al ${pet.animal_type} que publicaste para adopción.</p>
           
           <div style="background-color: #f4f4f4; padding: 15px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="margin-top: 0;">Datos de contacto del posible dueño:</h3>
+            <h3 style="margin-top: 0;">Datos del posible adoptante:</h3>
             <ul style="list-style: none; padding-left: 0;">
-              <li>👤 <strong>Nombre:</strong> ${claimer.name}</li>
-              <li>📧 <strong>Email:</strong> ${claimer.email}</li>
-              <li>📱 <strong>Teléfono:</strong> ${claimer.phone || "No registrado"}</li>
+              <li>👤 <strong>Nombre:</strong> ${adopter.name}</li>
+              <li>📧 <strong>Email:</strong> ${adopter.email}</li>
+              <li>📱 <strong>Teléfono:</strong> ${adopter.phone || "No registrado"}</li>
             </ul>
           </div>
           
-          <p>Por favor, ponte en contacto con esta persona lo antes posible para intercambiar fotos, validar información y coordinar el reencuentro.</p>
+          <p>Por favor, ponte en contacto con esta persona para iniciar el proceso de adopción.</p>
         </div>
       `,
       });
 
-      // Resend no lanza una excepción por defecto si el correo falla (ej. error de dominio),
-      // sino que te devuelve el error en el objeto destrurcturado. Lo atrapamos aquí:
       if (error) {
-        console.error("Error devuelto por la API de Resend:", error);
-        res
-          .status(500)
-          .json({
-            error:
-              "Ocurrió un error en el servicio de correos. Intenta más tarde.",
-          });
+        console.error("Error API Resend:", error);
+        res.status(500).json({ error: "Error en el servicio de correos." });
         return;
       }
 
-      // 6. Responder al frontend
-      res.status(200).json({
-        message:
-          "¡Solicitud enviada! Le hemos enviado un correo a la persona que encontró a la mascota con tus datos de contacto.",
-      });
+      res.status(200).json({ message: "¡Solicitud de adopción enviada al dueño!" });
+      
     } catch (error) {
-      console.error("Error general en el endpoint de reclamación:", error);
-      res
-        .status(500)
-        .json({
-          error: "Error interno al procesar tu solicitud o enviar el correo.",
-        });
+      res.status(500).json({ error: "Error interno al procesar tu solicitud." });
     }
-  },
+  }
 );
 
-export default petRoutes;
+export default adoptPets;

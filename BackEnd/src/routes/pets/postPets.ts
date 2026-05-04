@@ -11,10 +11,13 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage, limits: { files: 5 } });
 
 // Endpoint: POST /api/pets
-petRoutes.post("/pets",requireAuth,upload.array("photos", 5),
+petRoutes.post(
+  "/pets",
+  requireAuth,
+  upload.array("photos", 5),
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { userId } = res.locals.JwtPayload;
+      const { id: userId } = res.locals.JwtPayload;
 
       const {
         status,
@@ -91,7 +94,7 @@ petRoutes.post("/pets",requireAuth,upload.array("photos", 5),
           description,
           event_date,
           location_text,
-           location_geo: pointLocation,
+          location_geo: pointLocation,
           photos: photoUrls,
         });
 
@@ -100,8 +103,8 @@ petRoutes.post("/pets",requireAuth,upload.array("photos", 5),
           pet: newPet,
         });
       } catch (dbError) {
-         console.error("Error al guardar en la base de datos:", dbError);
-         throw new Error("Error de base de datos");  
+        console.error("Error al guardar en la base de datos:", dbError);
+        throw new Error("Error de base de datos");
       }
     } catch (error) {
       console.error("Error general al crear la publicación:", error);
