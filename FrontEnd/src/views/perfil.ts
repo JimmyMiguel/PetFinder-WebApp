@@ -2,6 +2,7 @@ import { globalStyles } from '../components/perfilcom/constants';
 import '../components/perfilcom/component/authenticated-profile-content';
 import '../components/perfilcom/component/unauthenticated-profile-card';
 import { getState, initializeState, logout, setUser } from '../core/state';
+import '../components/inicioCom/bottom-nav'
 
 const API = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
 
@@ -82,6 +83,8 @@ export class ProfileView extends HTMLElement {
         }
       </style>
       <div class="main-container">${body}</div>
+      <bottom-nav></bottom-nav>
+
     `;
   }
 }
