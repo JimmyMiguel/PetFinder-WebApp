@@ -1,7 +1,9 @@
-import { globalStyles } from '../components/perfilcom/constants';
-import { setUser } from '../core/state';
+import { globalStyles } from "../components/perfilcom/constants";
+import { setUser } from "../core/state";
+import { goTo } from "../core/router";
+import "../components/inicioCom/bottom-nav";
 
-const API = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
+const API = import.meta.env.VITE_API_URL ?? "http://localhost:3000/api";
 
 const authIcons = {
   mail: '<svg class="icon" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>',
@@ -11,7 +13,7 @@ const authIcons = {
 export class UserLoginForm extends HTMLElement {
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' });
+    this.attachShadow({ mode: "open" });
   }
 
   connectedCallback() {
@@ -20,23 +22,24 @@ export class UserLoginForm extends HTMLElement {
   }
 
   private setupEventListeners() {
-    const form = this.shadowRoot?.querySelector('form');
-    form?.addEventListener('submit', async (e) => {
+    const form = this.shadowRoot?.querySelector("form");
+    form?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const root = this.shadowRoot!;
-      const email = (root.querySelector('#email') as HTMLInputElement).value;
-      const password = (root.querySelector('#password') as HTMLInputElement).value;
+      const email = (root.querySelector("#email") as HTMLInputElement).value;
+      const password = (root.querySelector("#password") as HTMLInputElement)
+        .value;
 
       const res = await fetch(`${API}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.message || 'Error al iniciar sesión');
+        alert(data.message || "Error al iniciar sesión");
         return;
       }
 
@@ -45,7 +48,15 @@ export class UserLoginForm extends HTMLElement {
       });
       const { user } = await meRes.json();
       setUser(user, data.token);
+      goTo("/perfil");
     });
+
+    this.shadowRoot
+      ?.querySelector("#to-register")
+      ?.addEventListener("click", (e) => {
+        e.preventDefault();
+        goTo("/register");
+      });
   }
 
   render() {
@@ -53,6 +64,11 @@ export class UserLoginForm extends HTMLElement {
     this.shadowRoot.innerHTML = `
       <style>
         ${globalStyles}
+
+        :host {
+          display: block;
+          padding-bottom: 100px;
+        }
 
         .auth-container {
           background-color: var(--white);
@@ -180,11 +196,12 @@ export class UserLoginForm extends HTMLElement {
         </form>
 
         <div class="footer-link">
-          ¿No tienes cuenta? <a href="#" data-link="/register">Regístrate</a>
+          ¿No tienes cuenta? <a href="#" id="to-register">Regístrate</a>
         </div>
       </div>
+      <bottom-nav></bottom-nav>
     `;
   }
 }
 
-customElements.define('user-login-form', UserLoginForm);
+customElements.define("user-login-form", UserLoginForm);

@@ -1,20 +1,38 @@
+import { goTo } from "../../core/router";
+
 export class BottomNav extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
-    }
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+  }
 
-    connectedCallback() {
-        this.render();
-    }
+  connectedCallback() {
+    this.render();
+    this.setupEventListeners();
+  }
 
-    render() {
-        if (!this.shadowRoot) return;
-        this.shadowRoot.innerHTML = `
+  private setupEventListeners() {
+    const navItems = this.shadowRoot?.querySelectorAll(".nav-item");
+    navItems?.forEach((item) => {
+      item.addEventListener("click", () => {
+        const path = item.getAttribute("data-path");
+        if (path) goTo(path);
+      });
+    });
+  }
+
+  render() {
+    if (!this.shadowRoot) return;
+
+    // Normalizar el path actual para comparar con los atributos data-path
+    const path = window.location.pathname.replace(/\/$/, "") || "/";
+
+    this.shadowRoot.innerHTML = `
             <style>
                 :host {
-                    position: absolute;
+                    position: fixed;
                     bottom: 0;
+                    left: 0;
                     width: 100%;
                     height: 80px;
                     background-color: var(--bg-color);
@@ -53,25 +71,25 @@ export class BottomNav extends HTMLElement {
                 .nav-item.active span { color: var(--accent); }
                 .icon-lg { width: 24px; height: 24px; fill: currentColor; }
             </style>
-            <div class="nav-item active">
+            <div class="nav-item ${path === "/" ? "active" : ""}" data-path="/">
                 <div class="nav-icon-wrapper">
                     <svg class="icon-lg" viewBox="0 0 24 24"><path d="M10 20V14H14V20H19V12H22L12 3L2 12H5V20H10Z"/></svg>
                 </div>
                 <span>Found</span>
             </div>
-            <div class="nav-item">
+            <div class="nav-item ${path === "/adoptar" ? "active" : ""}" data-path="/adoptar">
                 <div class="nav-icon-wrapper">
                     <svg class="icon-lg" viewBox="0 0 24 24"><path d="M12 2C8.69 2 6 4.69 6 8C6 11.31 8.69 14 12 14C15.31 14 18 11.31 18 8C18 4.69 15.31 2 12 2M7.5 16C5 16 3 18 3 20.5V22H21V20.5C21 18 19 16 16.5 16H7.5Z"/></svg>
                 </div>
                 <span>Lost</span>
             </div>
-            <div class="nav-item">
+            <div class="nav-item ${path === "/perfil" ? "active" : ""}" data-path="/perfil">
                 <div class="nav-icon-wrapper">
                     <svg class="icon-lg" viewBox="0 0 24 24"><path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z"/></svg>
                 </div>
                 <span>Profile</span>
             </div>
         `;
-    }
+  }
 }
-customElements.define('bottom-nav', BottomNav);
+customElements.define("bottom-nav", BottomNav);

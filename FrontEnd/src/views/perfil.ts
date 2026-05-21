@@ -1,17 +1,17 @@
-import { globalStyles } from '../components/perfilcom/constants';
-import '../components/perfilcom/component/authenticated-profile-content';
-import '../components/perfilcom/component/unauthenticated-profile-card';
-import { getState, initializeState, logout, setUser } from '../core/state';
-import '../components/inicioCom/bottom-nav'
+import { globalStyles } from "../components/perfilcom/constants";
+import "../components/perfilcom/component/authenticated-profile-content";
+import "../components/perfilcom/component/unauthenticated-profile-card";
+import { getState, initializeState, logout, setUser } from "../core/state";
+import "../components/inicioCom/bottom-nav";
 
-const API = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
+const API = import.meta.env.VITE_API_URL ?? "http://localhost:3000/api";
 
 export class ProfileView extends HTMLElement {
   private ready = false;
 
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' });
+    this.attachShadow({ mode: "open" });
   }
 
   connectedCallback() {
@@ -51,13 +51,13 @@ export class ProfileView extends HTMLElement {
     const body = !this.ready
       ? '<p class="loading">Verificando sesión...</p>'
       : isAuthenticated
-        ? '<unauthenticated-profile-card></unauthenticated-profile-card>'
-        : '<unauthenticated-profile-card></unauthenticated-profile-card>';
+        ? "<authenticated-profile-content></authenticated-profile-content>"
+        : "<unauthenticated-profile-card></unauthenticated-profile-card>";
 
     this.shadowRoot.innerHTML = `
       <style>
         ${globalStyles}
-        :host { min-height: 100vh; padding: 20px 0; }
+        :host { min-height: 100vh; padding: 20px 0 100px 0; }
         .main-container {
           background-color: var(--white);
           border-radius: 40px;
@@ -89,4 +89,4 @@ export class ProfileView extends HTMLElement {
   }
 }
 
-customElements.define('profile-view', ProfileView);
+customElements.define("profile-view", ProfileView);
