@@ -43,6 +43,8 @@ app.listen(PORT, async () => {
   try {
     await sequelize.authenticate();
     console.log("✅ DB Conectada");
+    await sequelize.sync({ alter: true });
+    console.log("✅ Tablas sincronizadas/creadas");
   } catch (e) {
     console.error("❌ Error DB:", e);
   }

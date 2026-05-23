@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import multer from "multer";
 import { requireAuth } from "@/middleware/midToken";
 import { uploadAvatarToCloudinary } from "@/controllers/imagenPerfilController";
+import User from "@/models/users";
 
 const editProfile = Router();
 
@@ -37,6 +38,9 @@ editProfile.put(
 
       // CONSUMIMOS EL SERVICIO EXTRAÍDO
       const imageUrl = await uploadAvatarToCloudinary(file.buffer, userId);
+
+      // ACTUALIZAMOS EL USUARIO EN LA BD (Faltaba este paso)
+      await User.update({ profile_picture: imageUrl }, { where: { id: userId } });
 
       // RESPUESTA EXITOSA
       res.status(200).json({

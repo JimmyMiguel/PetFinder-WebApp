@@ -1,4 +1,4 @@
-import { v2 as cloudinary } from 'cloudinary';
+import cloudinary from "@/config/cloudinary";
 
 // Asumimos que ya tienes configurado cloudinary.config() en tu app
 
@@ -8,21 +8,21 @@ import { v2 as cloudinary } from 'cloudinary';
 const extractPublicIdFromUrl = (url: string): string | null => {
   try {
     // Ejemplo de URL: https://res.cloudinary.com/nube/image/upload/v1612345/petfinder/mascota-123.jpg
-    const splitUrl = url.split('/upload/');
+    const splitUrl = url.split("/upload/");
     if (splitUrl.length < 2) return null;
 
     // Obtiene todo lo que está después de /upload/ (ej. v1612345/petfinder/mascota-123.jpg)
-    const pathParts = splitUrl[1].split('/'); 
-    
+    const pathParts = splitUrl[1].split("/");
+
     // Elimina la versión de la ruta (el elemento que empieza con 'v', ej. v1612345)
-    pathParts.shift(); 
-    
+    pathParts.shift();
+
     // Une el resto de la ruta (ej. petfinder/mascota-123.jpg)
-    const fullPath = pathParts.join('/'); 
-    
+    const fullPath = pathParts.join("/");
+
     // Quita la extensión del archivo (.jpg, .png)
-    const publicId = fullPath.substring(0, fullPath.lastIndexOf('.')); 
-    
+    const publicId = fullPath.substring(0, fullPath.lastIndexOf("."));
+
     return publicId; // Retorna: petfinder/mascota-123
   } catch (error) {
     console.error("Error al extraer public_id de la URL:", url, error);
@@ -40,7 +40,7 @@ export const deletePetPhotos = async (photoUrls: string[]): Promise<void> => {
     // 1. Convertimos el arreglo de URLs en un arreglo de promesas de borrado
     const deletePromises = photoUrls.map((url) => {
       const publicId = extractPublicIdFromUrl(url);
-      
+
       if (publicId) {
         // Ejecuta el borrado en Cloudinary
         return cloudinary.uploader.destroy(publicId);
@@ -50,12 +50,16 @@ export const deletePetPhotos = async (photoUrls: string[]): Promise<void> => {
 
     // 2. Ejecutamos todas las promesas al mismo tiempo (Concurrencia)
     await Promise.all(deletePromises);
-    
-    console.log(`Se han eliminado ${photoUrls.length} imágenes de Cloudinary exitosamente.`);
 
+    console.log(
+      `Se han eliminado ${photoUrls.length} imágenes de Cloudinary exitosamente.`,
+    );
   } catch (error) {
     // No lanzamos un throw error aquí para no romper el flujo de la base de datos.
     // Solo registramos el error para revisarlo en los logs del servidor.
-    console.error('Error crítico al intentar borrar imágenes en Cloudinary:', error);
+    console.error(
+      "Error crítico al intentar borrar imágenes en Cloudinary:",
+      error,
+    );
   }
 };

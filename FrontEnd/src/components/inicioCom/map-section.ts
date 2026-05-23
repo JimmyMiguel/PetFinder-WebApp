@@ -46,6 +46,7 @@ export class MapSection extends HTMLElement {
                         linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px);
                     background-size: 20px 20px;
                     box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+                    margin-bottom: 60px;
                 }
                 .map-pin {
                     position: absolute;

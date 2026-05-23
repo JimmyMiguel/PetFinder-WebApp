@@ -88,12 +88,12 @@ petRoutes.post(
         const newPet = await Pet.create({
           id: petId,
           userId,
-          status,
-          name: name || null,
-          animal_type,
-          description,
-          event_date,
-          location_text,
+          status: status.trim().toUpperCase(),
+          name: name ? name.trim() : null,
+          animal_type: animal_type.trim(),
+          description: description.trim(),
+          event_date: event_date.trim(), // 👈 Esto elimina los espacios que causan el warning
+          location_text: location_text.trim(),
           location_geo: pointLocation,
           photos: photoUrls,
         });

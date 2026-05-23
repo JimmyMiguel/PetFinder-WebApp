@@ -31,7 +31,7 @@ register.post("/auth/register", async (req: Request, res: Response) => {
       name: name,
     });
     //creamos un token con el identificacod id y lo ponemos que expira en 1 hora
-    const token = jwt.sign({ id: newUser.id }, process.env.JWT_TOKEN!, {
+    const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET!, {
       expiresIn: "1h",
     });
 

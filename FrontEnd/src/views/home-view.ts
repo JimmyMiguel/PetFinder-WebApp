@@ -1,24 +1,60 @@
- export class HomeView extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
+const API = import.meta.env.VITE_API_URL ?? "http://localhost:3000/api";
+
+export class HomeView extends HTMLElement {
+  private pets: any[] = [];
+  private loading: boolean = true;
+
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+  }
+
+  async connectedCallback() {
+    await this.fetchPets();
+    this.render();
+  }
+
+  async fetchPets() {
+    try {
+      this.loading = true;
+      this.render(); // Renderiza estado de carga
+
+      // Consultamos el endpoint sin filtros para traer "todas" como pediste
+      const res = await fetch(`${API}/pets`);
+      if (res.ok) {
+        const json = await res.json();
+        this.pets = json.data; // El backend devuelve las filas en la propiedad 'data'
+      }
+    } catch (error) {
+      console.error("Error al obtener las mascotas desde el servidor:", error);
+    } finally {
+      this.loading = false;
+      this.render();
     }
+  }
 
-    connectedCallback() {
-        this.render();
-    }
+  render() {
+    if (!this.shadowRoot) return;
 
-    render() {
-        if (!this.shadowRoot) return;
+    const petsListContent = this.loading
+      ? '<p class="status-msg">Buscando mascotas cerca de ti...</p>'
+      : this.pets.length === 0
+        ? '<p class="status-msg">No se encontraron mascotas en este momento.</p>'
+        : this.pets
+            .map(
+              (pet) => `
+              <pet-card 
+                  name="${pet.name || "Desconocido"}" 
+                  location="${pet.location_text}" 
+                  image="${pet.photos && pet.photos.length > 0 ? pet.photos[0] : "https://placehold.co/300x300?text=Sin+Foto"}" 
+                  btn-text="¡Es mi mascota!"
+                  badge="${pet.status}"
+              ></pet-card>
+          `,
+            )
+            .join("");
 
-        const pets = [
-            { name: 'Maximus', location: 'Parque Central', image: 'https://placehold.co/300x300/e6c587/4a3b32?text=Dog+1', badge: 'RECIÉN VISTO', btnText: '¡Mío!', hasIcon: true },
-            { name: 'Mina', location: 'Calle Palmeras', image: 'https://placehold.co/300x300/3d3b3c/ffffff?text=Cat', badge: null, btnText: '¡Es mi mascota!', hasIcon: false },
-            { name: 'Cazador', location: 'Barrio Los Álamos', image: 'https://placehold.co/300x300/7a9a4d/ffffff?text=Dog+2', badge: null, btnText: '¡Es mi mascota!', hasIcon: false },
-            { name: 'Desconocido', location: 'Avenida del Sol', image: 'https://placehold.co/300x300/c7b6a7/4a3b32?text=Dog+3', badge: null, btnText: '¡Es mi mascota!', hasIcon: false }
-        ];
-
-        this.shadowRoot.innerHTML = `
+    this.shadowRoot.innerHTML = `
             <style>
                 :host {
                     display: block;
@@ -30,7 +66,13 @@
                 .overline { font-size: 0.7rem; color: var(--overline); font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; }
                 h1 { font-size: 1.8rem; font-weight: 800; line-height: 1.2; margin: 4px 0 8px 0; color: var(--text-dark); }
                 .subtitle { font-size: 0.9rem; color: var(--text-light); font-weight: 600; }
-                .pets-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 20px; }
+                .status-msg { padding: 40px 20px; text-align: center; font-weight: 700; color: var(--text-light); grid-column: 1 / -1; }
+                .pets-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; padding: 0 20px; }
+                @media (min-width: 1024px) {
+                    .pets-grid {
+                        grid-template-columns: repeat(4, 1fr);
+                    }
+                }
             </style>
 
             <app-header></app-header>
@@ -42,22 +84,14 @@
             </section>
 
             <div class="pets-grid">
-                ${pets.map(pet => `
-                    <pet-card 
-                        name="${pet.name}" 
-                        location="${pet.location}" 
-                        image="${pet.image}" 
-                        btn-text="${pet.btnText}"
-                        ${pet.badge ? `badge="${pet.badge}"` : ''}
-                        ${pet.hasIcon ? `btn-icon="true"` : ''}
-                    ></pet-card>
-                `).join('')}
+                ${petsListContent}
             </div>
 
             <app-pagination></app-pagination>
             <map-section></map-section>
             <bottom-nav></bottom-nav>
         `;
-    }
+  }
 }
-customElements.define('home-view', HomeView);
+
+customElements.define("home-view", HomeView);
