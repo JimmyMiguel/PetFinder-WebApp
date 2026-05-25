@@ -1,54 +1,72 @@
+import { goTo } from "../../core/router";
+import { getState } from "../../core/state";
+import { globalStyles } from "../perfilcom/constants";
+
 export class AppHeader extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
-    }
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+  }
 
-    connectedCallback() {
-        this.render();
-    }
+  connectedCallback() {
+    this.render();
+  }
 
-    render() {
-        if (!this.shadowRoot) return;
-        this.shadowRoot.innerHTML = `
-            <style>
-                :host {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    padding: 24px 20px;
-                    width: 100%;
-                    box-sizing: border-box;
-                    font-family: 'Nunito', sans-serif;
-                }
-                .logo {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    font-weight: 800;
-                    font-size: 1.25rem;
-                    color: #8c5730;
-                }
-                .logo svg {
-                    width: 24px;
-                    height: 24px;
-                    fill: #8c5730;
-                }
-                .avatar {
-                    width: 40px;
-                    height: 40px;
-                    border-radius: 50%;
-                    object-fit: cover;
-                    border: 2px solid var(--white);
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                }
-            </style>
-            <div class="logo">
-                <svg viewBox="0 0 24 24"><path d="M12 2C8.69 2 6 4.69 6 8C6 11.31 8.69 14 12 14C15.31 14 18 11.31 18 8C18 4.69 15.31 2 12 2M7.5 16C5 16 3 18 3 20.5V22H21V20.5C21 18 19 16 16.5 16H7.5Z" /></svg>
-                PetFinder
-            </div>
-            <img src="https://placehold.co/100x100/4a3b32/fff?text=User" alt="Perfil" class="avatar">
-        `;
-    }
+  render() {
+    this.shadowRoot!.innerHTML = `
+      <style>
+        ${globalStyles}
+        header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 15px 20px;
+          background-color: var(--white);
+          box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+          position: sticky;
+          top: 0;
+          z-index: 10;
+        }
+        .logo { font-size: 1.3rem; font-weight: 900; color: var(--accent); cursor: pointer; }
+        .profile-btn { 
+          background: var(--light-bg); 
+          border: none; 
+          border-radius: 50%; 
+          width: 40px; height: 40px; 
+          display: flex; align-items: center; justify-content: center; 
+          cursor: pointer; transition: transform 0.2s;
+        }
+        .profile-btn:active { transform: scale(0.9); }
+        svg { width: 24px; height: 24px; color: var(--text-dark); }
+      </style>
+      <header>
+        <div class="logo" id="home-link">PetFinder</div>
+        <button class="profile-btn" id="profile-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        </button>
+      </header>
+    `;
+
+    this.shadowRoot!.querySelector("#profile-link")?.addEventListener(
+      "click",
+      () => {
+        const state = getState();
+
+        if (state.isAuthenticated) {
+          // Si está logueado, va a la vista de edición (user-profile-header)
+          // IMPORTANTE: Asegúrate de que esta ruta esté definida en tu router.ts
+          goTo("/editar-perfil");
+        } else {
+          // Si no está logueado, va a la vista de perfil (perfil.ts) para iniciar sesión
+          goTo("/perfil");
+        }
+      },
+    );
+
+    this.shadowRoot!.querySelector("#home-link")?.addEventListener(
+      "click",
+      () => goTo("/"),
+    );
+  }
 }
-customElements.define('app-header', AppHeader);
+customElements.define("app-header", AppHeader);

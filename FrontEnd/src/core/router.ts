@@ -1,3 +1,10 @@
+import "../views/home-view";
+import "../views/formLogin";
+import "../views/formRegister";
+import "../views/perfil";
+import "../views/adoptar-view";
+import "../views/user-profile-header";
+
 let currentContainer: HTMLElement | null = null;
 
 const rutasArray = [
@@ -20,6 +27,10 @@ const rutasArray = [
   {
     path: /^\/adoptar$/,
     accionFun: () => document.createElement("adoptar-view"),
+  },
+  {
+    path: /^\/editar-perfil$/,
+    accionFun: () => document.createElement("user-profile-header"),
   },
 ];
 

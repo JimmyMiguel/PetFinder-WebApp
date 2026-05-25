@@ -1,10 +1,11 @@
-import { globalStyles, Icons } from '../constants';
-import './primary-button'; // Importamos el botón para asegurar que exista
+import { globalStyles, Icons } from "../constants";
+import "./primary-button"; // Importamos el botón para asegurar que exista
+import { goTo } from "../../../core/router";
 
 export class UnauthenticatedProfileCard extends HTMLElement {
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' });
+    this.attachShadow({ mode: "open" });
   }
 
   connectedCallback() {
@@ -32,6 +33,23 @@ export class UnauthenticatedProfileCard extends HTMLElement {
         </div>
       </div>
     `;
+
+    // Listener para el botón de registro
+    this.shadowRoot
+      ?.querySelector("primary-button")
+      ?.addEventListener("click", () => {
+        goTo("/register");
+      });
+
+    // Listener para el botón de login (clase btn-secondary)
+    this.shadowRoot
+      ?.querySelector(".btn-secondary")
+      ?.addEventListener("click", () => {
+        goTo("/login");
+      });
   }
 }
-customElements.define('unauthenticated-profile-card', UnauthenticatedProfileCard);
+customElements.define(
+  "unauthenticated-profile-card",
+  UnauthenticatedProfileCard,
+);

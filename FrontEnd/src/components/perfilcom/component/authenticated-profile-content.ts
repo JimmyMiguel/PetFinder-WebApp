@@ -1,13 +1,13 @@
-import { globalStyles } from '../constants';
-import './user-profile-header';
-import './stat-card';
-import './primary-button';
-import './report-pet-form';
+import { globalStyles } from "../constants";
+import "../../inicioCom/app-header";
+import "./stat-card";
+import "./primary-button";
+import "./report-pet-form";
 
 export class AuthenticatedProfileContent extends HTMLElement {
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' });
+    this.attachShadow({ mode: "open" });
   }
 
   connectedCallback() {
@@ -19,7 +19,7 @@ export class AuthenticatedProfileContent extends HTMLElement {
         .report-button-wrapper { margin-bottom: 30px; }
       </style>
       <div class="profile-container">
-        <user-profile-header></user-profile-header>
+        <app-header></app-header>
         
         <div class="stats-grid">
           <stat-card value="3" label="Mascotas reportadas"></stat-card>
@@ -35,4 +35,7 @@ export class AuthenticatedProfileContent extends HTMLElement {
     `;
   }
 }
-customElements.define('authenticated-profile-content', AuthenticatedProfileContent);
+customElements.define(
+  "authenticated-profile-content",
+  AuthenticatedProfileContent,
+);

@@ -1,3 +1,11 @@
+import { goTo } from "../core/router";
+import { getState } from "../core/state";
+import "../components/inicioCom/app-header";
+import "../components/inicioCom/bottom-nav";
+import "../components/inicioCom/pet-card";
+import "../components/inicioCom/app-pagination";
+import "../components/inicioCom/map-section";
+
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3000/api";
 
 export class HomeView extends HTMLElement {

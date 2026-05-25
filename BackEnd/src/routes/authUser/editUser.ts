@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import multer from "multer";
 import { requireAuth } from "@/middleware/midToken";
 import { uploadAvatarToCloudinary } from "@/controllers/imagenPerfilController";
+import bcrypt from "bcrypt";
 import User from "@/models/users";
 
 const editProfile = Router();
@@ -53,6 +54,45 @@ editProfile.put(
       const errorMessage =
         error instanceof Error ? error.message : "Error interno del servidor";
       res.status(500).json({ error: errorMessage });
+    }
+  },
+);
+
+// NUEVO: Endpoint para actualizar nombre y contraseña
+// PUT /api/user/profile
+editProfile.put(
+  "/user/profile",
+  requireAuth,
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { id: userId } = res.locals.JwtPayload;
+      const { name, password } = req.body;
+
+      const updateData: any = {};
+
+      // Solo agregamos al objeto de actualización si el usuario envió el dato
+      if (name) updateData.name = name;
+      
+      if (password && password.length >= 8) {
+        updateData.password = await bcrypt.hash(password, 10);
+      } else if (password) {
+        res.status(400).json({ error: "La contraseña debe tener al menos 8 caracteres" });
+        return;
+      }
+
+      if (Object.keys(updateData).length === 0) {
+        res.status(400).json({ error: "No se proporcionaron datos para actualizar" });
+        return;
+      }
+
+      await User.update(updateData, { where: { id: userId } });
+
+      res.status(200).json({
+        message: "Perfil actualizado correctamente",
+      });
+    } catch (error) {
+      console.error("Error al actualizar perfil:", error);
+      res.status(500).json({ error: "Error interno del servidor" });
     }
   },
 );
